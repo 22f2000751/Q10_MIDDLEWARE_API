@@ -32,7 +32,7 @@ clients = {}
 async def middleware(request: Request, call_next):
 
     # --------------------------
-    # Request ID
+    # Request Context
     # --------------------------
     request_id = request.headers.get("X-Request-ID")
 
@@ -46,6 +46,7 @@ async def middleware(request: Request, call_next):
     # --------------------------
     client_id = request.headers.get("X-Client-Id")
 
+    # Only rate-limit requests that include X-Client-Id
     if client_id:
 
         now = time.time()
@@ -55,22 +56,20 @@ async def middleware(request: Request, call_next):
         history = [t for t in history if now - t < WINDOW]
 
         if len(history) >= LIMIT:
-
             response = JSONResponse(
                 status_code=429,
                 content={"detail": "Rate limit exceeded"}
             )
-
             response.headers["X-Request-ID"] = request_id
-
             return response
 
         history.append(now)
-
         clients[client_id] = history
 
+    # Continue to endpoint
     response = await call_next(request)
 
+    # Always return X-Request-ID
     response.headers["X-Request-ID"] = request_id
 
     return response
@@ -83,7 +82,6 @@ def root():
 
 @app.get("/ping")
 def ping(request: Request):
-
     return {
         "email": EMAIL,
         "request_id": request.state.request_id
