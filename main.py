@@ -14,12 +14,13 @@ ALLOWED_ORIGIN = "https://app-2q3lqm.example.com"
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        ALLOWED_ORIGIN,
+        "https://app-2q3lqm.example.com",
         "https://exam.sanand.workers.dev"
     ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["X-Request-ID"]   # IMPORTANT
 )
 
 # Rate limit settings
