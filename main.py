@@ -22,7 +22,7 @@ app.add_middleware(
     expose_headers=["X-Request-ID"]
 )
 
-LIMIT = 12
+LIMIT = 16
 WINDOW = 10
 
 clients = {}
